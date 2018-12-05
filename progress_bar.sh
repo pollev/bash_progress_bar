@@ -1,8 +1,17 @@
 #!/bin/bash
 
-
 # This code was inspired by the open source C code of the APT progress bar
 # http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/apt/trusty/view/head:/apt-pkg/install-progress.cc#L233
+
+#
+# Usage:
+# Source this script
+# setup_scroll_area
+# draw_progress_bar 10
+# draw_progress_bar 90
+# destroy_scroll_area
+#
+
 
 CODE_SAVE_CURSOR="\033[s"
 CODE_RESTORE_CURSOR="\033[u"
@@ -58,8 +67,8 @@ function draw_progress_bar() {
 
     # Move cursor position to last row
     echo -en "\033[${lines};0f"
-	
-	# Clear progress bar
+
+    # Clear progress bar
     tput el
 
     # Draw progress bar
@@ -101,35 +110,19 @@ function print_bar_text() {
     fi
 }
 
+function trap_on_interrupt() {
+    # If this function is called, we setup an interrupt handler to cleanup the progress bar
+    trap cleanup_on_interrupt INT
+}
+
+function cleanup_on_interrupt() {
+    destroy_scroll_area
+    exit
+}
+
 printf_new() {
     str=$1
     num=$2
     v=$(printf "%-${num}s" "$str")
     echo -ne "${v// /$str}"
 }
-
-setup_scroll_area
-echo "this is a test"
-sleep 1
-
-echo "this is a test"
-sleep 1
-
-echo "this is a test"
-sleep 1
-
-draw_progress_bar 10
-sleep 1
-echo "this is a test"
-sleep 1
-
-echo "this is a test"
-sleep 1
-
-draw_progress_bar 90
-sleep 1
-
-echo "this is a test"
-sleep 1
-
-destroy_scroll_area
