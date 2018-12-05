@@ -96,18 +96,16 @@ function clear_progress_bar() {
 
 function print_bar_text() {
     local percentage=$1
+    local cols=$(tput cols)
+    let bar_size=$cols-17
 
     # Prepare progress bar
-    let remainder=100-$percentage
-    progress_bar=$(echo -ne "["; echo -en "${COLOR_FG}${COLOR_BG}"; printf_new "#" $percentage; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder; echo -ne "]");
+    let complete_size=($bar_size*$percentage)/100
+    let remainder_size=$bar_size-$complete_size
+    progress_bar=$(echo -ne "["; echo -en "${COLOR_FG}${COLOR_BG}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
 
     # Print progress bar
-    if [ $1 -gt 99 ]
-    then
-        echo -ne "${progress_bar}"
-    else
-        echo -ne "${progress_bar}"
-    fi
+    echo -ne " Progress ${percentage}% ${progress_bar}"
 }
 
 function trap_on_interrupt() {
