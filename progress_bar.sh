@@ -3,23 +3,30 @@
 # This code was inspired by the open source C code of the APT progress bar
 # http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/apt/trusty/view/head:/apt-pkg/install-progress.cc#L233
 
-#
+
 # Usage:
 # Source this script
-# setup_scroll_area
-# draw_progress_bar 10
-# draw_progress_bar 90
-# destroy_scroll_area
-#
+# trap_on_interrupt <- optional to clean up properly if script is ctrl-C
+# setup_scroll_area <- create empty progress bar
+# draw_progress_bar 10 <- advance progress bar
+# draw_progress_bar 40 <- advance progress bar
+# block_progress_bar 45 <- turns the progress bar yellow to indicate some action is requested from the user
+# draw_progress_bar 90 <- advance progress bar
+# destroy_scroll_area <- remove progress bar
 
 
+# Constants
 CODE_SAVE_CURSOR="\033[s"
 CODE_RESTORE_CURSOR="\033[u"
 CODE_CURSOR_IN_SCROLL_AREA="\033[1A"
 COLOR_FG="\e[30m"
 COLOR_BG="\e[42m"
+COLOR_BG_BLOCKED="\e[43m"
 RESTORE_FG="\e[39m"
 RESTORE_BG="\e[49m"
+
+# Variables
+PROGRESS_BLOCKED="false"
 
 function setup_scroll_area() {
     lines=$(tput lines)
@@ -72,6 +79,28 @@ function draw_progress_bar() {
     tput el
 
     # Draw progress bar
+    PROGRESS_BLOCKED="false"
+    print_bar_text $percentage
+
+    # Restore cursor position
+    echo -en "$CODE_RESTORE_CURSOR"
+}
+
+function block_progress_bar() {
+    percentage=$1
+    lines=$(tput lines)
+    let lines=$lines
+    # Save cursor
+    echo -en "$CODE_SAVE_CURSOR"
+
+    # Move cursor position to last row
+    echo -en "\033[${lines};0f"
+
+    # Clear progress bar
+    tput el
+
+    # Draw progress bar
+    PROGRESS_BLOCKED="true"
     print_bar_text $percentage
 
     # Restore cursor position
@@ -99,10 +128,15 @@ function print_bar_text() {
     local cols=$(tput cols)
     let bar_size=$cols-17
 
+    local color="${COLOR_FG}${COLOR_BG}"
+    if [ "$PROGRESS_BLOCKED" = "true" ]; then
+        color="${COLOR_FG}${COLOR_BG_BLOCKED}"
+    fi
+
     # Prepare progress bar
     let complete_size=($bar_size*$percentage)/100
     let remainder_size=$bar_size-$complete_size
-    progress_bar=$(echo -ne "["; echo -en "${COLOR_FG}${COLOR_BG}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
+    progress_bar=$(echo -ne "["; echo -en "${color}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
 
     # Print progress bar
     echo -ne " Progress ${percentage}% ${progress_bar}"
