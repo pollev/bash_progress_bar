@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# This code was inspired by the open source C code of the APT progress bar
-# http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/apt/trusty/view/head:/apt-pkg/install-progress.cc#L233
-
-
 # Usage:
 # Source this script
-# trap_on_interrupt <- optional to clean up properly if script is ctrl-C 
+# enable_trapping <- optional to clean up properly if user presses ctrl-c
 # setup_scroll_area <- create empty progress bar
 # draw_progress_bar 10 <- advance progress bar
 # draw_progress_bar 40 <- advance progress bar
@@ -169,7 +165,7 @@ function cleanup_on_interrupt() {
     exit
 }
 
-printf_new() {
+function printf_new() {
     str=$1
     num=$2
     v=$(printf "%-${num}s" "$str")
