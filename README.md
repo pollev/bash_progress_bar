@@ -7,4 +7,4 @@ An example can be viewed in `test_bar.sh`. The actual implementation can be foun
 
 Example output:
 
-![](example.png)
+![](example.gif)
