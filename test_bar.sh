@@ -15,7 +15,7 @@ function generate_some_output_and_sleep() {
 
 function main() {
     # Make sure that the progress bar is cleaned up when user presses ctrl+c
-    trap_on_interrupt
+    enable_trapping
     # Create progress bar
     setup_scroll_area
     for i in {1..99}
