@@ -6,7 +6,7 @@
 
 # Usage:
 # Source this script
-# trap_on_interrupt <- optional to clean up properly if script is ctrl-C
+# trap_on_interrupt <- optional to clean up properly if script is ctrl-C 
 # setup_scroll_area <- create empty progress bar
 # draw_progress_bar 10 <- advance progress bar
 # draw_progress_bar 40 <- advance progress bar
@@ -27,8 +27,15 @@ RESTORE_BG="\e[49m"
 
 # Variables
 PROGRESS_BLOCKED="false"
+TRAPPING_ENABLED="false"
+TRAP_SET="false"
 
 function setup_scroll_area() {
+    # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
+    if [ "$TRAPPING_ENABLED" = "true" ]; then
+        trap_on_interrupt
+    fi
+
     lines=$(tput lines)
     let lines=$lines-1
     # Scroll down a bit to avoid visual glitch when the screen area shrinks by one row
@@ -63,6 +70,11 @@ function destroy_scroll_area() {
 
     # Scroll down a bit to avoid visual glitch when the screen area grows by one row
     echo -en "\n\n"
+    
+    # Once the scroll area is cleared, we want to remove any trap previously set. Otherwise, ctrl+c will exit our shell
+    if [ "$TRAP_SET" = "true" ]; then
+        trap - INT
+    fi
 }
 
 function draw_progress_bar() {
@@ -142,8 +154,13 @@ function print_bar_text() {
     echo -ne " Progress ${percentage}% ${progress_bar}"
 }
 
+function enable_trapping() {
+    TRAPPING_ENABLED="true"
+}
+
 function trap_on_interrupt() {
     # If this function is called, we setup an interrupt handler to cleanup the progress bar
+    TRAP_SET="true"
     trap cleanup_on_interrupt INT
 }
 
