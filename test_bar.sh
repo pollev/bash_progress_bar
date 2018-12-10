@@ -5,7 +5,9 @@ source ./progress_bar.sh
 
 function generate_some_output_and_sleep() {
     echo "Here is some output"
-    ls -la /tmp
+    head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
+    head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
+    head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
     head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
     echo -e "\n\n------------------------------------------------------------------"
     echo -e "\n\n Now sleeping one second \n\n"
