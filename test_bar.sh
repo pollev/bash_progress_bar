@@ -9,7 +9,7 @@ function generate_some_output_and_sleep() {
     head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
     echo -e "\n\n------------------------------------------------------------------"
     echo -e "\n\n Now sleeping one second \n\n"
-    sleep 1
+    sleep 0.3
 }
 
 
@@ -20,8 +20,14 @@ function main() {
     setup_scroll_area
     for i in {1..99}
     do
-        generate_some_output_and_sleep
-        draw_progress_bar $i
+        if [ $i = 50 ]; then
+            echo "waiting for user input"
+            block_progress_bar $i
+            read -p "User input: "
+        else
+            generate_some_output_and_sleep
+            draw_progress_bar $i
+        fi
     done
     destroy_scroll_area
 }
