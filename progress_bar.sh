@@ -66,7 +66,7 @@ function destroy_scroll_area() {
 
     # Scroll down a bit to avoid visual glitch when the screen area grows by one row
     echo -en "\n\n"
-    
+
     # Once the scroll area is cleared, we want to remove any trap previously set. Otherwise, ctrl+c will exit our shell
     if [ "$TRAP_SET" = "true" ]; then
         trap - INT
