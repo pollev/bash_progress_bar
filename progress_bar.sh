@@ -154,7 +154,7 @@ function enable_trapping {
     TRAPPING_ENABLED="true"
 }
 
-function trap_on_interrupt() {
+function trap_on_interrupt {
     # If this function is called, we setup an interrupt handler to cleanup the progress bar
     TRAP_SET="true"
     trap cleanup_on_interrupt INT
