@@ -3,7 +3,7 @@
 # Source progress bar
 source ./progress_bar.sh
 
-function generate_some_output_and_sleep() {
+function generate_some_output_and_sleep {
     echo "Here is some output"
     head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
     head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9~!@#$%^&*_-'
@@ -15,7 +15,7 @@ function generate_some_output_and_sleep() {
 }
 
 
-function main() {
+function main {
     # Make sure that the progress bar is cleaned up when user presses ctrl+c
     enable_trapping
     # Create progress bar
