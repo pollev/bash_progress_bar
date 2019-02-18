@@ -26,7 +26,7 @@ PROGRESS_BLOCKED="false"
 TRAPPING_ENABLED="false"
 TRAP_SET="false"
 
-function setup_scroll_area {
+setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
     if [ "$TRAPPING_ENABLED" = "true" ]; then
         trap_on_interrupt
@@ -50,7 +50,7 @@ function setup_scroll_area {
     draw_progress_bar 0
 }
 
-function destroy_scroll_area {
+destroy_scroll_area() {
     lines=$(tput lines)
     # Save cursor
     echo -en "$CODE_SAVE_CURSOR"
@@ -73,7 +73,7 @@ function destroy_scroll_area {
     fi
 }
 
-function draw_progress_bar {
+draw_progress_bar() {
     percentage=$1
     lines=$(tput lines)
     let lines=$lines
@@ -94,7 +94,7 @@ function draw_progress_bar {
     echo -en "$CODE_RESTORE_CURSOR"
 }
 
-function block_progress_bar {
+block_progress_bar() {
     percentage=$1
     lines=$(tput lines)
     let lines=$lines
@@ -115,7 +115,7 @@ function block_progress_bar {
     echo -en "$CODE_RESTORE_CURSOR"
 }
 
-function clear_progress_bar {
+clear_progress_bar() {
     lines=$(tput lines)
     let lines=$lines
     # Save cursor
@@ -131,7 +131,7 @@ function clear_progress_bar {
     echo -en "$CODE_RESTORE_CURSOR"
 }
 
-function print_bar_text {
+print_bar_text() {
     local percentage=$1
     local cols=$(tput cols)
     let bar_size=$cols-17
@@ -150,22 +150,22 @@ function print_bar_text {
     echo -ne " Progress ${percentage}% ${progress_bar}"
 }
 
-function enable_trapping {
+enable_trapping() {
     TRAPPING_ENABLED="true"
 }
 
-function trap_on_interrupt {
+trap_on_interrupt() {
     # If this function is called, we setup an interrupt handler to cleanup the progress bar
     TRAP_SET="true"
     trap cleanup_on_interrupt INT
 }
 
-function cleanup_on_interrupt {
+cleanup_on_interrupt() {
     destroy_scroll_area
     exit
 }
 
-function printf_new {
+printf_new() {
     str=$1
     num=$2
     v=$(printf "%-${num}s" "$str")
