@@ -26,6 +26,8 @@ PROGRESS_BLOCKED="false"
 TRAPPING_ENABLED="false"
 TRAP_SET="false"
 
+CURRENT_NR_LINES=0
+
 setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
     if [ "$TRAPPING_ENABLED" = "true" ]; then
@@ -33,6 +35,7 @@ setup_scroll_area() {
     fi
 
     lines=$(tput lines)
+    CURRENT_NR_LINES=$lines
     let lines=$lines-1
     # Scroll down a bit to avoid visual glitch when the screen area shrinks by one row
     echo -en "\n"
@@ -77,6 +80,12 @@ draw_progress_bar() {
     percentage=$1
     lines=$(tput lines)
     let lines=$lines
+
+    # Check if the window has been resized. If so, reset the scroll area
+    if [ "$lines" -ne "$CURRENT_NR_LINES" ]; then
+        setup_scroll_area
+    fi
+
     # Save cursor
     echo -en "$CODE_SAVE_CURSOR"
 
