@@ -10,4 +10,5 @@ An example can be viewed in `test_bar.sh`.
 The actual implementation can be found in `progress_bar.sh`.
 
 ### Example output:
-![](assets/example.gif)
+
+![an example](assets/example.gif)
