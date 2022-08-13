@@ -14,24 +14,19 @@ generate_some_output_and_sleep() {
     sleep 0.3
 }
 
-
 main() {
-    # Make sure that the progress bar is cleaned up when user presses ctrl+c
-    enable_trapping
-    # Create progress bar
-    setup_scroll_area
+    auto_setup_progress_bar
     for i in {1..99}
     do
         if [ $i = 50 ]; then
             echo "waiting for user input"
-            block_progress_bar $i
+            auto_block_progress_bar
             read -p "User input: "
         else
             generate_some_output_and_sleep
-            draw_progress_bar $i
         fi
     done
-    destroy_scroll_area
+    auto_end_progress_bar
 }
 
 main

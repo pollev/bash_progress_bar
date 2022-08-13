@@ -1,7 +1,13 @@
 #!/bin/bash
 # https://github.com/pollev/bash_progress_bar - See license at end of file
+# https://github.com/mblockelet/bash_progress_bar - Thanks mblockelet for the Auto Function
 
-# Usage:
+# Auto Usage:
+# auto_setup_progress_bar <- create empty progress bar
+# auto_block_progress_bar <- turns the progress bar yellow to indicate some action is requested from the user
+# auto_end_progress_bar <- remove progress bar
+
+# Manual Usage:
 # Source this script
 # enable_trapping <- optional to clean up properly if user presses ctrl-c
 # setup_scroll_area <- create empty progress bar
@@ -181,6 +187,42 @@ printf_new() {
     echo -ne "${v// /$str}"
 }
 
+# auto progress
+auto_setup_progress_bar() {
+    start=$(grep -n -m 1 auto_setup_progress_bar "$0" | cut -d ':' -f 1)
+    end=$(grep -n -m 1 auto_end_progress_bar "$0" | cut -d ':' -f 1)
+    export PROGRESSBAR_START=$start
+    export PROGRESSBAR_END=$end
+    if [ -n "$1" ]
+    then
+        export PROGRESSBAR_TITLE="$1"
+    else
+        export PROGRESSBAR_TITLE="Progress"
+    fi
+    enable_trapping
+    setup_scroll_area
+    trap auto_draw_progress_bar DEBUG
+}
+
+auto_draw_progress_bar() {
+    if [ "$PROGRESSBAR_BLOCKED" = "true" ]; then
+        export PROGRESSBAR_BLOCKED="false"
+    else
+        lineno=$BASH_LINENO
+        draw_progress_bar $((($lineno-$PROGRESSBAR_START)*100/($PROGRESSBAR_END-$PROGRESSBAR_START)))
+    fi
+}
+
+auto_block_progress_bar() {
+    lineno=$BASH_LINENO
+    block_progress_bar $((($lineno-$PROGRESSBAR_START)*100/($PROGRESSBAR_END-$PROGRESSBAR_START)))
+    export PROGRESSBAR_BLOCKED="true"
+}
+
+auto_end_progress_bar() {
+    trap - DEBUG
+    destroy_scroll_area
+}
 
 # SPDX-License-Identifier: MIT
 #
