@@ -28,6 +28,7 @@ TRAP_SET="false"
 
 CURRENT_NR_LINES=0
 PROGRESS_TITLE=""
+PROGRESS_TOTAL=100
 
 setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
@@ -37,6 +38,9 @@ setup_scroll_area() {
 
     # Handle first parameter: alternative progress bar title
     [ -n "$1" ] && PROGRESS_TITLE="$1" || PROGRESS_TITLE="Progress"
+
+    # Handle second parameter : alternative total count
+    [ -n "$2" ] && PROGRESS_TOTAL=$2 || PROGRESS_TOTAL=100
 
     lines=$(tput lines)
     CURRENT_NR_LINES=$lines
@@ -85,6 +89,11 @@ destroy_scroll_area() {
 
 draw_progress_bar() {
     percentage=$1
+    if [ $PROGRESS_TOTAL -ne 100 ]
+    then
+	[ $PROGRESS_TOTAL -eq 0 ] && percentage=100 || let percentage=percentage*100/$PROGRESS_TOTAL
+    fi
+
     lines=$(tput lines)
     let lines=$lines
 
