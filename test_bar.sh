@@ -20,6 +20,8 @@ MAX=99
 main() {
     # Make sure that the progress bar is cleaned up when user presses ctrl+c
     enable_trapping
+    # Enable ETA
+    ETA_ENABLED="true"
     # Create progress bar
     setup_scroll_area "Processing" $MAX
     # Compute middle for user input test

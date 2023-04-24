@@ -24,11 +24,14 @@ RESTORE_BG="\e[49m"
 # Variables
 PROGRESS_BLOCKED="false"
 TRAPPING_ENABLED="false"
+ETA_ENABLED="false"
 TRAP_SET="false"
 
 CURRENT_NR_LINES=0
 PROGRESS_TITLE=""
 PROGRESS_TOTAL=100
+PROGRESS_START=0
+BLOCKED_START=0
 
 setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
@@ -56,6 +59,11 @@ setup_scroll_area() {
     # Restore cursor but ensure its inside the scrolling area
     echo -en "$CODE_RESTORE_CURSOR"
     echo -en "$CODE_CURSOR_IN_SCROLL_AREA"
+
+    # Store start timestamp to compute ETA
+    if [ "$ETA_ENABLED" = "true" ]; then
+      PROGRESS_START=$( date +%s )
+    fi
 
     # Start empty progress bar
     draw_progress_bar 0
@@ -87,7 +95,29 @@ destroy_scroll_area() {
     fi
 }
 
+format_eta() {
+    local T=$1
+    local D=$((T/60/60/24))
+    local H=$((T/60/60%24))
+    local M=$((T/60%60))
+    local S=$((T%60))
+    [ $D -eq 0 -a $H -eq 0 -a $M -eq 0 -a $S -eq 0 ] && echo "--:--:--" && return
+    [ $D -gt 0 ] && printf '%d days, ' $D
+    printf 'ETA: %d:%02.f:%02.f' $H $M $S
+}
+
 draw_progress_bar() {
+    eta=""
+    if [ "$ETA_ENABLED" = "true" -a $1 -gt 0 ]; then
+        if [ "$PROGRESS_BLOCKED" = "true" ]; then
+            let blocked_duration=$(date +%s)-$BLOCKED_START
+            let PROGRESS_START=$PROGRESS_START+$blocked_duration
+        fi
+        let running_time=$(date +%s)-PROGRESS_START
+        let total_time=PROGRESS_TOTAL*running_time/$1
+        eta=$( format_eta $(($total_time-$running_time)) )
+    fi
+
     percentage=$1
     if [ $PROGRESS_TOTAL -ne 100 ]
     then
@@ -114,7 +144,7 @@ draw_progress_bar() {
 
     # Draw progress bar
     PROGRESS_BLOCKED="false"
-    print_bar_text $percentage "$extra"
+    print_bar_text $percentage "$extra" "$eta"
 
     # Restore cursor position
     echo -en "$CODE_RESTORE_CURSOR"
@@ -135,6 +165,7 @@ block_progress_bar() {
 
     # Draw progress bar
     PROGRESS_BLOCKED="true"
+    BLOCKED_START=$( date +%s )
     print_bar_text $percentage
 
     # Restore cursor position
@@ -161,6 +192,11 @@ print_bar_text() {
     local percentage=$1
     local extra=$2
     [ -n "$extra" ] && extra=" ($extra)"
+    local eta=$3
+    if [ -n "$eta" ]; then
+        [ -n "$extra" ] && extra="$extra "
+        extra="$extra$eta"
+    fi
     local cols=$(tput cols)
     let bar_size=$cols-9-${#PROGRESS_TITLE}-${#extra}
 
