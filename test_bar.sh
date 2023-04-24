@@ -32,7 +32,7 @@ main() {
             read -p "User input: "
         else
             generate_some_output_and_sleep
-            draw_progress_bar $i
+            draw_progress_bar $i "$( date "+%r" )| $i on $MAX"
         fi
     done
     destroy_scroll_area

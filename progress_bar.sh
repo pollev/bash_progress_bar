@@ -93,6 +93,7 @@ draw_progress_bar() {
     then
 	[ $PROGRESS_TOTAL -eq 0 ] && percentage=100 || let percentage=percentage*100/$PROGRESS_TOTAL
     fi
+    extra=$2
 
     lines=$(tput lines)
     let lines=$lines
@@ -113,7 +114,7 @@ draw_progress_bar() {
 
     # Draw progress bar
     PROGRESS_BLOCKED="false"
-    print_bar_text $percentage
+    print_bar_text $percentage "$extra"
 
     # Restore cursor position
     echo -en "$CODE_RESTORE_CURSOR"
@@ -158,8 +159,10 @@ clear_progress_bar() {
 
 print_bar_text() {
     local percentage=$1
+    local extra=$2
+    [ -n "$extra" ] && extra=" ($extra)"
     local cols=$(tput cols)
-    let bar_size=$cols-9-${#PROGRESS_TITLE}
+    let bar_size=$cols-9-${#PROGRESS_TITLE}-${#extra}
 
     local color="${COLOR_FG}${COLOR_BG}"
     if [ "$PROGRESS_BLOCKED" = "true" ]; then
@@ -172,7 +175,7 @@ print_bar_text() {
     progress_bar=$(echo -ne "["; echo -en "${color}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
 
     # Print progress bar
-    echo -ne " $PROGRESS_TITLE ${percentage}% ${progress_bar}"
+    echo -ne " $PROGRESS_TITLE ${percentage}% ${progress_bar}${extra}"
 }
 
 enable_trapping() {
