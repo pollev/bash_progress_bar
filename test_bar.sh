@@ -19,7 +19,7 @@ main() {
     # Make sure that the progress bar is cleaned up when user presses ctrl+c
     enable_trapping
     # Create progress bar
-    setup_scroll_area
+    setup_scroll_area "Processing"
     for i in {1..99}
     do
         if [ $i = 50 ]; then

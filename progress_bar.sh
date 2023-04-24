@@ -27,12 +27,16 @@ TRAPPING_ENABLED="false"
 TRAP_SET="false"
 
 CURRENT_NR_LINES=0
+PROGRESS_TITLE=""
 
 setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
     if [ "$TRAPPING_ENABLED" = "true" ]; then
         trap_on_interrupt
     fi
+
+    # Handle first parameter: alternative progress bar title
+    [ -n "$1" ] && PROGRESS_TITLE="$1" || PROGRESS_TITLE="Progress"
 
     lines=$(tput lines)
     CURRENT_NR_LINES=$lines
@@ -69,6 +73,9 @@ destroy_scroll_area() {
 
     # Scroll down a bit to avoid visual glitch when the screen area grows by one row
     echo -en "\n\n"
+
+    # Reset title for next usage
+    PROGRESS_TITLE=""
 
     # Once the scroll area is cleared, we want to remove any trap previously set. Otherwise, ctrl+c will exit our shell
     if [ "$TRAP_SET" = "true" ]; then
@@ -143,7 +150,7 @@ clear_progress_bar() {
 print_bar_text() {
     local percentage=$1
     local cols=$(tput cols)
-    let bar_size=$cols-17
+    let bar_size=$cols-9-${#PROGRESS_TITLE}
 
     local color="${COLOR_FG}${COLOR_BG}"
     if [ "$PROGRESS_BLOCKED" = "true" ]; then
@@ -156,7 +163,7 @@ print_bar_text() {
     progress_bar=$(echo -ne "["; echo -en "${color}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
 
     # Print progress bar
-    echo -ne " Progress ${percentage}% ${progress_bar}"
+    echo -ne " $PROGRESS_TITLE ${percentage}% ${progress_bar}"
 }
 
 enable_trapping() {
