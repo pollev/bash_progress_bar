@@ -33,6 +33,7 @@ PROGRESS_TOTAL=100
 PROGRESS_START=0
 BLOCKED_START=0
 
+# shellcheck disable=SC2120
 setup_scroll_area() {
     # If trapping is enabled, we will want to activate it whenever we setup the scroll area and remove it when we break the scroll area
     if [ "$TRAPPING_ENABLED" = "true" ]; then
@@ -47,7 +48,7 @@ setup_scroll_area() {
 
     lines=$(tput lines)
     CURRENT_NR_LINES=$lines
-    let lines=$lines-1
+    lines=$((lines-1))
     # Scroll down a bit to avoid visual glitch when the screen area shrinks by one row
     echo -en "\n"
 
@@ -110,23 +111,23 @@ draw_progress_bar() {
     eta=""
     if [ "$ETA_ENABLED" = "true" -a $1 -gt 0 ]; then
         if [ "$PROGRESS_BLOCKED" = "true" ]; then
-            let blocked_duration=$(date +%s)-$BLOCKED_START
-            let PROGRESS_START=$PROGRESS_START+$blocked_duration
+            blocked_duration=$(($(date +%s)-$BLOCKED_START))
+            PROGRESS_START=$((PROGRESS_START+blocked_duration))
         fi
-        let running_time=$(date +%s)-PROGRESS_START
-        let total_time=PROGRESS_TOTAL*running_time/$1
+        running_time=$(($(date +%s)-PROGRESS_START))
+        total_time=$((PROGRESS_TOTAL*running_time/$1))
         eta=$( format_eta $(($total_time-$running_time)) )
     fi
 
     percentage=$1
     if [ $PROGRESS_TOTAL -ne 100 ]
     then
-	[ $PROGRESS_TOTAL -eq 0 ] && percentage=100 || let percentage=percentage*100/$PROGRESS_TOTAL
+	[ $PROGRESS_TOTAL -eq 0 ] && percentage=100 || percentage=$((percentage*100/$PROGRESS_TOTAL))
     fi
     extra=$2
 
     lines=$(tput lines)
-    let lines=$lines
+    lines=$((lines))
 
     # Check if the window has been resized. If so, reset the scroll area
     if [ "$lines" -ne "$CURRENT_NR_LINES" ]; then
@@ -153,7 +154,7 @@ draw_progress_bar() {
 block_progress_bar() {
     percentage=$1
     lines=$(tput lines)
-    let lines=$lines
+    lines=$((lines))
     # Save cursor
     echo -en "$CODE_SAVE_CURSOR"
 
@@ -174,7 +175,7 @@ block_progress_bar() {
 
 clear_progress_bar() {
     lines=$(tput lines)
-    let lines=$lines
+    lines=$((lines))
     # Save cursor
     echo -en "$CODE_SAVE_CURSOR"
 
@@ -198,7 +199,7 @@ print_bar_text() {
         extra="$extra$eta"
     fi
     local cols=$(tput cols)
-    let bar_size=$cols-9-${#PROGRESS_TITLE}-${#extra}
+    bar_size=$((cols-9-${#PROGRESS_TITLE}-${#extra}))
 
     local color="${COLOR_FG}${COLOR_BG}"
     if [ "$PROGRESS_BLOCKED" = "true" ]; then
@@ -206,8 +207,8 @@ print_bar_text() {
     fi
 
     # Prepare progress bar
-    let complete_size=($bar_size*$percentage)/100
-    let remainder_size=$bar_size-$complete_size
+    complete_size=$(((bar_size*percentage)/100))
+    remainder_size=$((bar_size-complete_size))
     progress_bar=$(echo -ne "["; echo -en "${color}"; printf_new "#" $complete_size; echo -en "${RESTORE_FG}${RESTORE_BG}"; printf_new "." $remainder_size; echo -ne "]");
 
     # Print progress bar
@@ -221,7 +222,7 @@ enable_trapping() {
 trap_on_interrupt() {
     # If this function is called, we setup an interrupt handler to cleanup the progress bar
     TRAP_SET="true"
-    trap cleanup_on_interrupt INT
+    trap cleanup_on_interrupt EXIT
 }
 
 cleanup_on_interrupt() {
